@@ -37,7 +37,7 @@ const WELCOME_SLIDES: WelcomeSlide[] = [
     tag: 'Bienvenida a CUIDAR',
     title: 'Miramos tus alimentos con vos',
     subtitle: 'Solo acercá tu cámara o subí una foto para conocer su frescura real.',
-    imageUrl: '/src/assets/images/food_tomato_cut_1794792028176.jpg',
+    imageUrl: '/assets/images/food_tomato_cut_1794792028176.jpg',
     imageAlt: 'Tomate fresco recién cortado',
     badgeLabel: 'Tomate fresco',
     badgeValue: 'Listo para analizar',
@@ -52,7 +52,7 @@ const WELCOME_SLIDES: WelcomeSlide[] = [
     tag: 'Clima y hogar',
     title: 'Se adapta al calor de tu cocina',
     subtitle: 'Elegí entre el clima de tu ciudad o la temperatura dentro de tu casa.',
-    imageUrl: '/src/assets/images/food_avocado_hass_1794792028440.jpg',
+    imageUrl: '/assets/images/food_avocado_hass_1794792028440.jpg',
     imageAlt: 'Palta Hass fresca abierta a la mitad',
     badgeLabel: 'Palta Hass',
     badgeValue: 'Sensible al calor',
@@ -67,7 +67,7 @@ const WELCOME_SLIDES: WelcomeSlide[] = [
     tag: 'Anticípate sin esfuerzo',
     title: 'Sabé qué consumir primero',
     subtitle: 'Te avisamos con suavidad qué frutas y verduras necesitan tu atención hoy.',
-    imageUrl: '/src/assets/images/food_strawberries_fresh_1794792030083.jpg',
+    imageUrl: '/assets/images/food_strawberries_fresh_1794792030083.jpg',
     imageAlt: 'Frutillas frescas con gotas de agua',
     badgeLabel: 'Frutillas',
     badgeValue: 'Frescura delicada',
@@ -82,7 +82,7 @@ const WELCOME_SLIDES: WelcomeSlide[] = [
     tag: 'Tu mesa y tu impacto',
     title: 'Aprovechá cada ingrediente',
     subtitle: 'Guardá tus compras en tu alacena visual y evitá que nada se desperdicie.',
-    imageUrl: '/src/assets/images/food_spinach_leaves_1794792030679.jpg',
+    imageUrl: '/assets/images/food_spinach_leaves_1794792030679.jpg',
     imageAlt: 'Hojas de espinaca fresca orgánica',
     badgeLabel: 'Hojas verdes',
     badgeValue: 'Cuidado diario',
@@ -162,7 +162,7 @@ export const InteractiveManualCarousel: React.FC<InteractiveManualCarouselProps>
           className="grid grid-cols-1 md:grid-cols-12 items-stretch cursor-grab active:cursor-grabbing"
         >
           {/* Left / Top Visual Protagonist Image */}
-          <div className="md:col-span-5 relative min-h-[210px] sm:min-h-[240px] overflow-hidden">
+          <div className="md:col-span-5 relative min-h-[240px] sm:min-h-[300px] lg:min-h-[340px] overflow-hidden">
             <ResilientImage
               src={slide.imageUrl}
               alt={slide.imageAlt}
@@ -189,17 +189,17 @@ export const InteractiveManualCarousel: React.FC<InteractiveManualCarouselProps>
           </div>
 
           {/* Right / Bottom Warm Minimalist Content */}
-          <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-5">
-            <div className="space-y-2.5">
+          <div className="md:col-span-7 p-6 sm:p-9 lg:p-11 flex flex-col justify-between space-y-6">
+            <div className="space-y-3">
               <span className="text-xs font-medium text-[#A8C4AE] tracking-wide block">
                 {slide.tag}
               </span>
 
-              <h3 className="text-xl sm:text-2xl font-display font-semibold text-[#F8F8F3] tracking-tight">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-display font-semibold text-[#F8F8F3] tracking-tight">
                 {slide.title}
               </h3>
 
-              <p className="text-sm text-[#A0AAA4] leading-relaxed max-w-md">
+              <p className="text-sm sm:text-base text-[#A0AAA4] leading-relaxed max-w-xl">
                 {slide.subtitle}
               </p>
             </div>
@@ -294,7 +294,7 @@ export const InteractiveManualCarousel: React.FC<InteractiveManualCarouselProps>
         onClick={onDismissModal}
       >
         <div
-          className="w-full max-w-3xl"
+          className="w-full max-w-5xl"
           onClick={(e) => e.stopPropagation()}
         >
           {carouselCard}

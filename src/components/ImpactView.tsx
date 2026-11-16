@@ -60,7 +60,7 @@ export const ImpactView: React.FC<ImpactViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-5 sm:px-10 py-8 space-y-8">
+    <div className="w-full max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-14 py-8 space-y-8">
       {/* Header */}
       <ScrollReveal durationMs={480} translateY={14}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

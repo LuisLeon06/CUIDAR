@@ -53,7 +53,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.35,
     avgPriceArs: 1450,
     ethyleneSensitive: true,
-    defaultImageUrl: '/src/assets/images/food_tomato_cut_1794792028176.jpg',
+    defaultImageUrl: '/assets/images/food_tomato_cut_1794792028176.jpg',
   },
   palta: {
     key: 'palta',
@@ -66,7 +66,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.28,
     avgPriceArs: 2300,
     ethyleneSensitive: true,
-    defaultImageUrl: '/src/assets/images/food_avocado_hass_1794792028440.jpg',
+    defaultImageUrl: '/assets/images/food_avocado_hass_1794792028440.jpg',
   },
   frutilla: {
     key: 'frutilla',
@@ -79,7 +79,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.4,
     avgPriceArs: 3400,
     ethyleneSensitive: false,
-    defaultImageUrl: '/src/assets/images/food_strawberries_fresh_1794792030083.jpg',
+    defaultImageUrl: '/assets/images/food_strawberries_fresh_1794792030083.jpg',
   },
   espinaca: {
     key: 'espinaca',
@@ -92,7 +92,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.3,
     avgPriceArs: 1650,
     ethyleneSensitive: true,
-    defaultImageUrl: '/src/assets/images/food_spinach_leaves_1794792030679.jpg',
+    defaultImageUrl: '/assets/images/food_spinach_leaves_1794792030679.jpg',
   },
   banana: {
     key: 'banana',
@@ -105,7 +105,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.5,
     avgPriceArs: 1800,
     ethyleneSensitive: true,
-    defaultImageUrl: '/src/assets/images/food_avocado_hass_1794792028440.jpg',
+    defaultImageUrl: '/assets/images/food_avocado_hass_1794792028440.jpg',
   },
   morron: {
     key: 'morron',
@@ -118,7 +118,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.32,
     avgPriceArs: 2100,
     ethyleneSensitive: false,
-    defaultImageUrl: '/src/assets/images/food_tomato_cut_1794792028176.jpg',
+    defaultImageUrl: '/assets/images/food_tomato_cut_1794792028176.jpg',
   },
   lechuga: {
     key: 'lechuga',
@@ -131,7 +131,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.35,
     avgPriceArs: 1500,
     ethyleneSensitive: true,
-    defaultImageUrl: '/src/assets/images/food_spinach_leaves_1794792030679.jpg',
+    defaultImageUrl: '/assets/images/food_spinach_leaves_1794792030679.jpg',
   },
   manzana: {
     key: 'manzana',
@@ -144,7 +144,7 @@ export const BOTANICAL_PROFILES: Record<string, BotanicalProfile> = {
     avgWeightKg: 0.45,
     avgPriceArs: 1950,
     ethyleneSensitive: true,
-    defaultImageUrl: '/src/assets/images/food_strawberries_fresh_1794792030083.jpg',
+    defaultImageUrl: '/assets/images/food_strawberries_fresh_1794792030083.jpg',
   },
 };
 

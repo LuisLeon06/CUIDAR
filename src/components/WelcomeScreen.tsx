@@ -13,7 +13,7 @@ import { InteractiveManualCarousel } from './InteractiveManualCarousel.tsx';
 import { CuidarLogo, CuidarUser, TopRightAuthButton } from './AuthModal.tsx';
 import { ScrollReveal } from './ScrollReveal.tsx';
 
-const HERO_IMAGE_PATH = '/src/assets/images/hero_welcome_woman_scanning_1794792027154.jpg';
+const HERO_IMAGE_PATH = '/assets/images/hero_welcome_woman_scanning_1794792027154.jpg';
 
 interface CoverScreenProps {
   onEnterApp: () => void;
@@ -44,14 +44,14 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
       </div>
 
       {/* Floating Top Area (NO Header Bar on Welcome Cover) */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 sm:px-10 pt-8 flex items-center justify-between gap-6">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 pt-8 flex items-center justify-between gap-6">
         <CuidarLogo size="md" />
         <TopRightAuthButton user={user} onOpenAuthModal={onOpenAuthModal} />
       </div>
 
       {/* Main Protagonist Content Area */}
-      <main className="relative z-10 w-full max-w-6xl mx-auto px-6 sm:px-10 pb-16 pt-16 md:py-20 flex flex-col justify-end">
-        <ScrollReveal className="max-w-xl space-y-6" durationMs={540} translateY={18}>
+      <main className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 pb-16 pt-16 md:py-20 flex flex-col justify-end">
+        <ScrollReveal className="max-w-2xl space-y-6" durationMs={540} translateY={18}>
           {/* Subtle Slogan */}
           <p className="text-sm sm:text-base font-medium text-[#A8C4AE] tracking-wide">
             La inteligencia de cuidar lo que importa
@@ -133,7 +133,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       : 72;
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-5 sm:px-10 py-6 space-y-8">
+    <div className="w-full max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-14 py-8 space-y-9">
       {/* Section Title & Quick Scan Button */}
       <ScrollReveal durationMs={480} translateY={14}>
         <div className="flex flex-wrap items-center justify-between gap-4">

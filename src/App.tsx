@@ -580,7 +580,7 @@ export default function App() {
 
       {/* UNIFIED TOP HEADER: Fixed dark surface (#050505) + Toned-down Neon strictly on Logos & Edges */}
       <header className="sticky top-0 z-40 w-full bg-[#050505] border-t border-t-[#6FBF94]/45 border-b border-b-[#6FBF94]/30 shadow-[0_2px_14px_rgba(111,191,148,0.05)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-3">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 lg:px-14 h-16 flex items-center justify-between gap-3">
           {/* Left: Clean Official CUIDAR Logo (No button outline) */}
           <button
             type="button"
@@ -797,7 +797,7 @@ export default function App() {
         aria-label="Explorar módulos"
         className="fixed bottom-0 left-0 right-0 z-40 bg-[#050505] border-t border-t-[#6FBF94]/35 shadow-[0_-2px_14px_rgba(111,191,148,0.05)]"
       >
-        <div className="max-w-3xl mx-auto h-18 grid grid-cols-4 items-center gap-2 px-3 sm:px-6">
+        <div className="max-w-5xl mx-auto h-18 grid grid-cols-4 items-center gap-3 px-4 sm:px-8">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;

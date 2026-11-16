@@ -221,7 +221,7 @@ export const ScannerPanel: React.FC<ScannerPanelProps> = ({
   const activeDisplayName = customFoodName.trim().toUpperCase() || selectedProfile.name;
 
   return (
-    <div className="min-h-[calc(100vh-9rem)] w-full flex flex-col justify-between px-5 sm:px-10 py-6 max-w-5xl mx-auto">
+    <div className="min-h-[calc(100vh-9rem)] w-full flex flex-col justify-between px-5 sm:px-10 lg:px-14 py-6 max-w-[1440px] mx-auto">
       {/* Centerpiece Experience: Either Scan Result OR Central Futuristic Scanner */}
       <main className="my-auto py-4 flex flex-col items-center justify-center">
         {scanResult ? (
@@ -239,7 +239,7 @@ export const ScannerPanel: React.FC<ScannerPanelProps> = ({
           />
         ) : (
           <ScrollReveal
-            className="w-full max-w-md flex flex-col items-center text-center"
+            className="w-full max-w-xl flex flex-col items-center text-center"
             durationMs={520}
             translateY={16}
           >
