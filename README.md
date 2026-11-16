@@ -55,3 +55,9 @@ En este modo no hay servidor Node: la app usa sus respaldos locales
 3. (Opcional) agregá la variable de entorno `GEMINI_API_KEY`.
 
 El servidor usa el puerto que define Hostinger (`PORT`) y sirve la API completa.
+
+## Licencia
+
+Copyright © 2026 Luis Emanuel León. Todos los derechos reservados.
+
+Este repositorio es público solo para su visualización y la evaluación de la hackatón. No se permite usar, copiar, modificar, distribuir ni desplegar el código, ni usar la marca "CUIDAR", sin autorización escrita. Ver [LICENSE](./LICENSE).

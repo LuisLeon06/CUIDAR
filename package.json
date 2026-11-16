@@ -1,5 +1,7 @@
 {
   "name": "cuidar",
+  "author": "Luis Emanuel León",
+  "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "version": "1.0.0",
   "type": "module",

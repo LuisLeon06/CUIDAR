@@ -851,6 +851,10 @@ export default function App() {
             )}
           </motion.div>
         </AnimatePresence>
+
+        <p className="mt-10 text-center text-[11px] text-[#A0AAA4]/70">
+          © 2026 Luis Emanuel León · CUIDAR. Todos los derechos reservados.
+        </p>
       </div>
 
       {/* BOTTOM MODULE EXPLORER BAR: Fixed dark surface (#050505) + Toned-down Neon strictly on Edges & Module Logos */}
