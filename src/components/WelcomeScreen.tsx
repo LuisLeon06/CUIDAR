@@ -13,7 +13,9 @@ import { InteractiveManualCarousel } from './InteractiveManualCarousel.tsx';
 import { CuidarLogo, CuidarUser, TopRightAuthButton } from './AuthModal.tsx';
 import { ScrollReveal } from './ScrollReveal.tsx';
 
-const HERO_IMAGE_PATH = '/assets/images/hero_welcome_woman_scanning_1794792027154.jpg';
+const HERO_IMAGE_MOBILE_PATH = '/assets/images/hero_mobile_man_scanning.jpg';
+const HERO_IMAGE_TABLET_PATH = '/assets/images/hero_tablet_scanning.jpg';
+const HERO_IMAGE_DESKTOP_PATH = '/assets/images/hero_welcome_woman_scanning_1794792027154.jpg';
 
 interface CoverScreenProps {
   onEnterApp: () => void;
@@ -31,19 +33,25 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
 }) => {
   return (
     <div className="relative min-h-screen w-full bg-[#0A0A0A] text-[#F8F8F3] flex flex-col justify-between overflow-hidden">
-      {/* Protagonist Cinematic Background Image — Focal point calibrated for Mobile & Desktop */}
+      {/* Protagonist Cinematic Background Image — Dedicated compositions for Mobile (9:16), Tablet (4:3) & Desktop (16:9) */}
       <div className="absolute inset-0 z-0">
-        <ResilientImage
-          src={HERO_IMAGE_PATH}
-          alt="Mujer sonriendo mientras escanea vegetales frescos con su celular en una cocina luminosa"
-          className="w-full h-full object-cover object-[66%_28%] sm:object-center scale-[1.01] transition-transform duration-1000"
-        />
+        <picture className="block w-full h-full">
+          <source media="(min-width: 1024px)" srcSet={HERO_IMAGE_DESKTOP_PATH} />
+          <source media="(min-width: 640px)" srcSet={HERO_IMAGE_TABLET_PATH} />
+          <img
+            src={HERO_IMAGE_MOBILE_PATH}
+            alt="Escaneo inteligente de frutas y verduras frescas con CUIDAR"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-center scale-[1.01] transition-transform duration-1000"
+          />
+        </picture>
+
         {/* Top subtle vignette for logo & login button legibility */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#0A0A0A]/70 via-[#0A0A0A]/25 to-transparent" />
-        {/* Bottom-only contrast scrim on mobile so the upper 60% of the photo stays luminous & clear */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/65 via-40% to-transparent sm:via-[#0A0A0A]/70 sm:to-[#0A0A0A]/25" />
-        {/* Side scrim only on wider desktop screens where text sits on the left */}
-        <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/85 via-[#0A0A0A]/40 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#0A0A0A]/80 via-[#0A0A0A]/30 to-transparent" />
+        {/* Bottom contrast scrim so the headline and CTA sit cleanly over pure black */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/65 via-35% to-transparent lg:via-[#0A0A0A]/70 lg:to-[#0A0A0A]/25" />
+        {/* Side scrim on tablet & desktop where headline sits on the left */}
+        <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/85 via-[#0A0A0A]/35 to-transparent" />
       </div>
 
       {/* Floating Top Area (NO Header Bar on Welcome Cover) */}
@@ -57,8 +65,8 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
       </div>
 
       {/* Main Protagonist Content Area */}
-      <main className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 pb-16 pt-16 md:py-20 flex flex-col justify-end">
-        <ScrollReveal className="max-w-2xl space-y-6" durationMs={540} translateY={18}>
+      <main className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 pb-12 sm:pb-16 pt-16 md:py-20 flex flex-col justify-end">
+        <ScrollReveal className="max-w-2xl space-y-5 sm:space-y-6" durationMs={540} translateY={18}>
           {/* Subtle Slogan */}
           <p className="text-sm sm:text-base font-medium text-[#A8C4AE] tracking-wide">
             La inteligencia de cuidar lo que importa
@@ -72,12 +80,12 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
             Conocé lo que tus alimentos necesitan antes de que sea tarde
           </h1>
 
-          {/* Primary CTA ("Comenzar") ONLY — triggers live city & weather notification upon click */}
+          {/* Primary CTA ("Comenzar") — full width on mobile, auto width on tablet/desktop */}
           <div className="pt-2 flex items-center">
             <button
               type="button"
               onClick={onEnterApp}
-              className="min-h-[54px] px-9 py-4 rounded-2xl bg-[#6FBF94] text-[#0A0A0A] font-display font-semibold text-base flex items-center justify-center gap-3 shadow-[0_0_16px_rgba(111,191,148,0.13)] hover:bg-[#A8C4AE] active:scale-[0.99] transition-all whitespace-nowrap cursor-pointer"
+              className="w-full sm:w-auto min-h-[54px] px-9 py-4 rounded-2xl bg-[#6FBF94] text-[#0A0A0A] font-display font-semibold text-base flex items-center justify-center gap-3 shadow-[0_0_16px_rgba(111,191,148,0.13)] hover:bg-[#A8C4AE] active:scale-[0.99] transition-all whitespace-nowrap cursor-pointer"
             >
               <span>Comenzar</span>
               <ArrowRight className="w-4 h-4" />
