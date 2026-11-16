@@ -93,7 +93,7 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
           </div>
         </ScrollReveal>
         <p className="mt-8 text-[11px] text-[#A0AAA4]/70">
-          © 2026 Luis Emanuel León · CUIDAR. Todos los derechos reservados.
+          © 2026 Luis Emanuel Leon Arancibia · CUIDAR. Todos los derechos reservados.
         </p>
       </main>
     </div>

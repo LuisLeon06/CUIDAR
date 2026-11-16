@@ -58,6 +58,6 @@ El servidor usa el puerto que define Hostinger (`PORT`) y sirve la API completa.
 
 ## Licencia
 
-Copyright © 2026 Luis Emanuel León. Todos los derechos reservados.
+Copyright © 2026 Luis Emanuel Leon Arancibia. Todos los derechos reservados.
 
 Este repositorio es público solo para su visualización y la evaluación de la hackatón. No se permite usar, copiar, modificar, distribuir ni desplegar el código, ni usar la marca "CUIDAR", sin autorización escrita. Ver [LICENSE](./LICENSE).

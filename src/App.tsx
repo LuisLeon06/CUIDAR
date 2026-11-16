@@ -853,7 +853,7 @@ export default function App() {
         </AnimatePresence>
 
         <p className="mt-10 text-center text-[11px] text-[#A0AAA4]/70">
-          © 2026 Luis Emanuel León · CUIDAR. Todos los derechos reservados.
+          © 2026 Luis Emanuel Leon Arancibia · CUIDAR. Todos los derechos reservados.
         </p>
       </div>
 
