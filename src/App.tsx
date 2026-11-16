@@ -21,11 +21,10 @@ import {
   StorageCondition,
 } from './types/cuidar.ts';
 import {
-  ARGENTINE_CITIES,
   BOTANICAL_PROFILES,
   computePredictionModel,
 } from './lib/predictionEngine.ts';
-import { fetchWeatherDirect } from './lib/clientWeather.ts';
+import { fetchWeatherDirect, detectDeviceLocationAuto } from './lib/clientWeather.ts';
 import { CoverScreen, WelcomeScreen } from './components/WelcomeScreen.tsx';
 import { ScannerPanel } from './components/ScannerPanel.tsx';
 import { InventoryView } from './components/InventoryView.tsx';
@@ -335,11 +334,19 @@ export default function App() {
 
   // Try the Express backend first; if it's not available (static hosting), call the weather API from the browser
   const loadWeather = useCallback(
-    async (params: { cityId?: string; lat?: number; lon?: number }) => {
+    async (params: {
+      cityId?: string;
+      lat?: number;
+      lon?: number;
+      customName?: string;
+      customProvince?: string;
+    }) => {
       try {
         const query =
           params.lat !== undefined && params.lon !== undefined
-            ? `lat=${params.lat}&lon=${params.lon}`
+            ? `lat=${params.lat}&lon=${params.lon}${
+                params.customName ? `&customName=${encodeURIComponent(params.customName)}` : ''
+              }`
             : `cityId=${encodeURIComponent(params.cityId || 'caba')}`;
         const res = await fetch(`/api/weather?${query}`);
         const isJson = (res.headers.get('content-type') || '').includes('application/json');
@@ -355,7 +362,7 @@ export default function App() {
     []
   );
 
-  // Fetch weather by cityId
+  // Fetch weather by cityId (used by AuthModal if user has a profile city)
   const fetchWeatherByCityId = useCallback(
     async (cityId: string) => {
       const data = await loadWeather({ cityId });
@@ -367,20 +374,22 @@ export default function App() {
     [loadWeather, recalculateInventoryWithWeather]
   );
 
-  useEffect(() => {
-    fetchWeatherByCityId('caba');
-  }, [fetchWeatherByCityId]);
-
-  // Connect location directly using our app's regional weather engine (so Google/Chrome never shows its own browser permission popup)
+  // Connect device GPS / real city automatically (no manual city suggestions)
   const connectDeviceLocation = useCallback(async () => {
     setIsLocating(true);
     try {
-      const currentCityId =
-        ARGENTINE_CITIES.find((c) => c.name === weather.cityName)?.id || 'caba';
-      const data = await loadWeather({ cityId: currentCityId });
-      if (data) {
-        setWeather(data);
-        await recalculateInventoryWithWeather(data);
+      const detected = await detectDeviceLocationAuto();
+      if (detected) {
+        const data = await loadWeather({
+          lat: detected.lat,
+          lon: detected.lon,
+          customName: detected.cityName,
+          customProvince: detected.province,
+        });
+        if (data) {
+          setWeather(data);
+          await recalculateInventoryWithWeather(data);
+        }
       }
     } catch {
       // keep current weather fallback
@@ -394,7 +403,14 @@ export default function App() {
         // ignore
       }
     }
-  }, [loadWeather, recalculateInventoryWithWeather, weather.cityName]);
+  }, [loadWeather, recalculateInventoryWithWeather]);
+
+  // Automatically detect the user's real city on mount if already connected
+  useEffect(() => {
+    if (locationConnected) {
+      connectDeviceLocation();
+    }
+  }, []);
 
   // Open our mandatory location notice panel first (without triggering browser prompt until the user clicks "Conectar")
   const triggerCityAndWeatherNotification = useCallback(() => {
@@ -696,29 +712,8 @@ export default function App() {
                       Para continuar usando CUIDAR, sí o sí debés vincular la ubicación de tu dispositivo.
                     </p>
                     <p>
-                      Nuestra aplicación gestiona directamente la conexión climática local (temperatura y humedad real de tu zona) para calibrar con precisión la frescura y vida útil de tus alimentos.
+                      Detectaremos automáticamente tu ciudad actual y las condiciones climáticas reales (temperatura y humedad de tu zona) para calibrar con precisión la frescura de tus alimentos.
                     </p>
-                  </div>
-
-                  {/* Manual city preset selector styled like a clean notice field */}
-                  <div className="rounded-2xl bg-[#0A0A0A] border border-[#1C1F1E] p-3.5 space-y-2">
-                    <label className="text-[11px] font-medium text-[#A8C4AE] block">
-                      Región de referencia en Argentina:
-                    </label>
-                    <select
-                      value={
-                        ARGENTINE_CITIES.find((c) => c.name === weather.cityName)?.id ||
-                        'caba'
-                      }
-                      onChange={(e) => fetchWeatherByCityId(e.target.value)}
-                      className="w-full rounded-xl border border-[#1C1F1E] bg-[#050505] px-3 py-2.5 text-xs sm:text-sm text-[#F8F8F3] focus:border-[#6FBF94]/55 focus:outline-none cursor-pointer"
-                    >
-                      {ARGENTINE_CITIES.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name} ({c.province})
-                        </option>
-                      ))}
-                    </select>
                   </div>
 
                   <button
@@ -729,12 +724,12 @@ export default function App() {
                   >
                     {isLocating ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Conectando ubicación del dispositivo...</span>
+                        <RefreshCw className="w-4 h-4 animate-spin shrink-0" />
+                        <span>Detectando tu ubicación actual...</span>
                       </>
                     ) : (
                       <>
-                        <MapPin className="w-4 h-4" />
+                        <MapPin className="w-4 h-4 shrink-0" />
                         <span>Conectar ubicación del dispositivo</span>
                       </>
                     )}
@@ -743,13 +738,13 @@ export default function App() {
               ) : (
                 <>
                   <div className="rounded-2xl bg-[#0A0A0A] border border-[#6FBF94]/30 p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#A0AAA4]">Ubicación vinculada</span>
-                      <span className="text-[11px] font-semibold text-[#6FBF94] bg-[#6FBF94]/10 px-2.5 py-0.5 rounded-full border border-[#6FBF94]/30">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-[#A0AAA4]">Ubicación vinculada por GPS</span>
+                      <span className="text-[11px] font-semibold text-[#6FBF94] bg-[#6FBF94]/10 px-2.5 py-0.5 rounded-full border border-[#6FBF94]/30 shrink-0">
                         Conectado
                       </span>
                     </div>
-                    <p className="text-base font-display font-semibold text-[#F8F8F3]">
+                    <p className="text-base font-display font-semibold text-[#F8F8F3] break-words">
                       {weather.cityName}
                       {weather.province ? `, ${weather.province}` : ''}
                     </p>
@@ -759,45 +754,27 @@ export default function App() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-[#0A0A0A] border border-[#1C1F1E] p-3.5 flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2 flex-1">
-                      <span className="text-[#A0AAA4] whitespace-nowrap">Ciudad:</span>
-                      <select
-                        value={
-                          ARGENTINE_CITIES.find((c) => c.name === weather.cityName)?.id ||
-                          'caba'
-                        }
-                        onChange={(e) => fetchWeatherByCityId(e.target.value)}
-                        className="flex-1 rounded-xl border border-[#1C1F1E] bg-[#050505] px-2.5 py-1.5 text-xs text-[#F8F8F3] focus:border-[#6FBF94]/50 focus:outline-none cursor-pointer"
-                      >
-                        {ARGENTINE_CITIES.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name} ({c.province})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                     <button
                       type="button"
                       onClick={connectDeviceLocation}
                       disabled={isLocating}
-                      className="px-3 py-1.5 rounded-xl border border-[#6FBF94]/30 bg-[#1C1F1E]/50 hover:bg-[#1C1F1E] text-[#6FBF94] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                      className="w-full min-h-[46px] py-2.5 px-4 rounded-2xl border border-[#6FBF94]/35 bg-[#0A0A0A] hover:bg-[#1C1F1E]/70 text-[#6FBF94] font-display font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
                       <RefreshCw
-                        className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`}
+                        className={`w-4 h-4 shrink-0 ${isLocating ? 'animate-spin' : ''}`}
                       />
-                      <span>Actualizar GPS</span>
+                      <span>{isLocating ? 'Actualizando...' : 'Actualizar GPS'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowLocationWeatherToast(false)}
+                      className="w-full min-h-[46px] py-2.5 px-4 rounded-2xl bg-[#6FBF94] hover:bg-[#A8C4AE] text-[#0A0A0A] font-display font-semibold text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer"
+                    >
+                      Continuar a CUIDAR
                     </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowLocationWeatherToast(false)}
-                    className="w-full min-h-[46px] py-2.5 px-5 rounded-2xl bg-[#6FBF94] hover:bg-[#A8C4AE] text-[#0A0A0A] font-display font-semibold text-sm flex items-center justify-center transition-all cursor-pointer"
-                  >
-                    Continuar a CUIDAR
-                  </button>
                 </>
               )}
             </motion.div>

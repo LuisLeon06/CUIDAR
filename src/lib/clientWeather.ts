@@ -52,10 +52,78 @@ async function resolveCityName(
   return { cityName: nearest.name, province: nearest.province };
 }
 
+export async function detectDeviceLocationAuto(): Promise<{
+  lat: number;
+  lon: number;
+  cityName?: string;
+  province?: string;
+} | null> {
+  // 1. Try browser/device GPS first if available
+  if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 6500,
+          maximumAge: 60000,
+        });
+      });
+      return {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
+      };
+    } catch {
+      // If GPS fails or is denied, fall through to IP geolocation
+    }
+  }
+
+  // 2. Automatic IP-based geolocation fallback (BigDataCloud client endpoint allows CORS without coords)
+  try {
+    const res = await fetch(
+      'https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=es'
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        return {
+          lat: data.latitude,
+          lon: data.longitude,
+          cityName: data.city || data.locality || data.principalSubdivision,
+          province: data.principalSubdivision || data.countryName || 'Argentina',
+        };
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // 3. Secondary IP geolocation fallback (ipwho.is)
+  try {
+    const res = await fetch('https://ipwho.is/');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        return {
+          lat: data.latitude,
+          lon: data.longitude,
+          cityName: data.city || data.region,
+          province: data.region || data.country || 'Argentina',
+        };
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  return null;
+}
+
 export async function fetchWeatherDirect(params: {
   cityId?: string;
   lat?: number;
   lon?: number;
+  customName?: string;
+  customProvince?: string;
 }): Promise<ArgentineCityWeather | null> {
   const preset =
     ARGENTINE_CITIES.find((c) => c.id === params.cityId) || ARGENTINE_CITIES[0];
@@ -68,9 +136,9 @@ export async function fetchWeatherDirect(params: {
   const lat = hasCoords ? (params.lat as number) : preset.lat;
   const lon = hasCoords ? (params.lon as number) : preset.lon;
 
-  let cityName = preset.name;
-  let province = preset.province;
-  if (hasCoords) {
+  let cityName = params.customName || preset.name;
+  let province = params.customProvince || preset.province;
+  if (hasCoords && !params.customName) {
     const resolved = await resolveCityName(lat, lon);
     cityName = resolved.cityName;
     province = resolved.province;
