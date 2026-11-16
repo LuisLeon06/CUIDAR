@@ -31,22 +31,29 @@ export const CoverScreen: React.FC<CoverScreenProps> = ({
 }) => {
   return (
     <div className="relative min-h-screen w-full bg-[#0A0A0A] text-[#F8F8F3] flex flex-col justify-between overflow-hidden">
-      {/* Protagonist Cinematic Background Image */}
+      {/* Protagonist Cinematic Background Image — Focal point calibrated for Mobile & Desktop */}
       <div className="absolute inset-0 z-0">
         <ResilientImage
           src={HERO_IMAGE_PATH}
           alt="Mujer sonriendo mientras escanea vegetales frescos con su celular en una cocina luminosa"
-          className="w-full h-full object-cover object-center scale-[1.01] transition-transform duration-1000"
+          className="w-full h-full object-cover object-[66%_28%] sm:object-center scale-[1.01] transition-transform duration-1000"
         />
-        {/* Measured multi-stop contrast scrims for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/75 to-[#0A0A0A]/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/90 via-[#0A0A0A]/45 to-transparent" />
+        {/* Top subtle vignette for logo & login button legibility */}
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#0A0A0A]/70 via-[#0A0A0A]/25 to-transparent" />
+        {/* Bottom-only contrast scrim on mobile so the upper 60% of the photo stays luminous & clear */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/65 via-40% to-transparent sm:via-[#0A0A0A]/70 sm:to-[#0A0A0A]/25" />
+        {/* Side scrim only on wider desktop screens where text sits on the left */}
+        <div className="hidden sm:block absolute inset-0 bg-gradient-to-r from-[#0A0A0A]/85 via-[#0A0A0A]/40 to-transparent" />
       </div>
 
       {/* Floating Top Area (NO Header Bar on Welcome Cover) */}
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 pt-8 flex items-center justify-between gap-6">
         <CuidarLogo size="md" />
-        <TopRightAuthButton user={user} onOpenAuthModal={onOpenAuthModal} />
+        <TopRightAuthButton
+          user={user}
+          onOpenAuthModal={onOpenAuthModal}
+          variant="cover"
+        />
       </div>
 
       {/* Main Protagonist Content Area */}

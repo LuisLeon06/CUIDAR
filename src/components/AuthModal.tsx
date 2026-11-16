@@ -59,17 +59,25 @@ export const CuidarLogo: React.FC<CuidarLogoProps> = ({
 interface TopRightAuthButtonProps {
   user: CuidarUser | null;
   onOpenAuthModal: () => void;
+  variant?: 'default' | 'cover';
 }
 
 export const TopRightAuthButton: React.FC<TopRightAuthButtonProps> = ({
   user,
   onOpenAuthModal,
+  variant = 'default',
 }) => {
+  const isCover = variant === 'cover';
+
   return (
     <button
       type="button"
       onClick={onOpenAuthModal}
-      className="min-h-[40px] px-3.5 py-2 rounded-xl bg-[#050505]/90 border border-[#6FBF94]/35 text-[#F8F8F3] shadow-[0_0_8px_rgba(111,191,148,0.06)] hover:border-[#6FBF94]/65 hover:bg-[#1C1F1E]/45 transition-all flex items-center gap-2 text-xs font-medium whitespace-nowrap shrink-0 cursor-pointer"
+      className={
+        isCover
+          ? 'min-h-[40px] px-4 py-2 rounded-xl bg-[#F8F8F3]/12 backdrop-blur-md border border-[#F8F8F3]/28 text-[#F8F8F3] shadow-[0_4px_20px_rgba(0,0,0,0.25)] hover:bg-[#F8F8F3]/22 hover:border-[#F8F8F3]/50 transition-all flex items-center gap-2 text-xs font-medium whitespace-nowrap shrink-0 cursor-pointer'
+          : 'min-h-[40px] px-3.5 py-2 rounded-xl bg-[#121514]/90 backdrop-blur-md border border-[#F8F8F3]/15 text-[#F8F8F3] shadow-[0_2px_10px_rgba(0,0,0,0.3)] hover:border-[#6FBF94]/50 hover:bg-[#1C1F1E]/60 transition-all flex items-center gap-2 text-xs font-medium whitespace-nowrap shrink-0 cursor-pointer'
+      }
     >
       {user ? (
         <>
@@ -78,7 +86,11 @@ export const TopRightAuthButton: React.FC<TopRightAuthButtonProps> = ({
         </>
       ) : (
         <>
-          <LogIn className="w-4 h-4 text-[#6FBF94] neon-logo-glow" />
+          <LogIn
+            className={`w-4 h-4 ${
+              isCover ? 'text-[#F8F8F3]' : 'text-[#6FBF94] neon-logo-glow'
+            }`}
+          />
           <span>Iniciar sesión</span>
         </>
       )}
