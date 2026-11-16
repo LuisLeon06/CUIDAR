@@ -1,0 +1,6 @@
+{
+  "name": "CUIDAR — Future Food Intelligence",
+  "description": "Plataforma argentina de inteligencia artificial para analizar, predecir y optimizar la conservación de frutas y verduras.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

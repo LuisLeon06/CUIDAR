@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --bg-canvas: #0A0A0A;
+    --bg-deep: #1C1F1E;
+    --accent-tech: #6FBF94;
+    --accent-soft: #A8C4AE;
+    --text-warm: #F8F8F3;
+    --text-muted: #A0AAA4;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    background-color: #0A0A0A;
+    color: #F8F8F3;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono-tabular {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Subtle, refined accent strictly for edges (orillas) and logos/icons — neon toned down for a black-dominant look */
+.neon-edge {
+  border-color: rgba(111,191,148,0.28);
+  box-shadow: 0 0 6px rgba(111,191,148,0.05), inset 0 0 3px rgba(111,191,148,0.03);
+}
+
+.neon-edge-subtle {
+  border-color: rgba(111,191,148,0.2);
+  box-shadow: 0 0 4px rgba(111,191,148,0.04);
+}
+
+.neon-logo-glow {
+  filter: drop-shadow(0 0 2px rgba(111,191,148,0.12));
+}
+
+@keyframes scanLaser {
+  0% {
+    transform: translateY(-110px);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(110px);
+    opacity: 0.2;
+  }
+}
+
+@keyframes ringRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ringRotateReverse {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-scan-laser {
+  animation: scanLaser 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+.animate-ring-slow {
+  animation: ringRotate 24s linear infinite;
+}
+
+.animate-ring-reverse {
+  animation: ringRotateReverse 18s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scan-laser,
+  .animate-ring-slow,
+  .animate-ring-reverse {
+    animation: none !important;
+  }
+}
