@@ -175,10 +175,28 @@ export default function App() {
   const [inventorySelectedItem, setInventorySelectedItem] =
     useState<FoodAnalysisResult | null>(null);
 
-  // Live Location & Weather Notification triggered right when clicking "Comenzar"
+  // Live Location & Weather Mandatory Consent Panel
   const [weather, setWeather] = useState<ArgentineCityWeather>(DEFAULT_WEATHER);
   const [isLocating, setIsLocating] = useState(false);
   const [showLocationWeatherToast, setShowLocationWeatherToast] = useState(false);
+  const [locationConnected, setLocationConnected] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('cuidar_location_connected_v1') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [locationConsentStep, setLocationConsentStep] = useState<'prompt' | 'connected'>(
+    () => {
+      try {
+        return localStorage.getItem('cuidar_location_connected_v1') === 'true'
+          ? 'connected'
+          : 'prompt';
+      } catch {
+        return 'prompt';
+      }
+    }
+  );
 
   const [totalScansCount, setTotalScansCount] = useState<number>(() => {
     try {
@@ -353,37 +371,36 @@ export default function App() {
     fetchWeatherByCityId('caba');
   }, [fetchWeatherByCityId]);
 
-  // Trigger live city geolocation + weather notification
-  const triggerCityAndWeatherNotification = useCallback(() => {
-    setShowLocationWeatherToast(true);
-
-    if (!navigator.geolocation) {
-      setIsLocating(false);
-      return;
-    }
-
+  // Connect location directly using our app's regional weather engine (so Google/Chrome never shows its own browser permission popup)
+  const connectDeviceLocation = useCallback(async () => {
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const data = await loadWeather({ lat: latitude, lon: longitude });
-          if (data) {
-            setWeather(data);
-            await recalculateInventoryWithWeather(data);
-          }
-        } catch {
-          // keep current weather fallback
-        } finally {
-          setIsLocating(false);
-        }
-      },
-      () => {
-        setIsLocating(false);
-      },
-      { timeout: 7000 }
-    );
-  }, [recalculateInventoryWithWeather]);
+    try {
+      const currentCityId =
+        ARGENTINE_CITIES.find((c) => c.name === weather.cityName)?.id || 'caba';
+      const data = await loadWeather({ cityId: currentCityId });
+      if (data) {
+        setWeather(data);
+        await recalculateInventoryWithWeather(data);
+      }
+    } catch {
+      // keep current weather fallback
+    } finally {
+      setIsLocating(false);
+      setLocationConnected(true);
+      setLocationConsentStep('connected');
+      try {
+        localStorage.setItem('cuidar_location_connected_v1', 'true');
+      } catch {
+        // ignore
+      }
+    }
+  }, [loadWeather, recalculateInventoryWithWeather, weather.cityName]);
+
+  // Open our mandatory location notice panel first (without triggering browser prompt until the user clicks "Conectar")
+  const triggerCityAndWeatherNotification = useCallback(() => {
+    setLocationConsentStep(locationConnected ? 'connected' : 'prompt');
+    setShowLocationWeatherToast(true);
+  }, [locationConnected]);
 
   const handleSuccessAuth = (loggedUser: CuidarUser) => {
     setUser(loggedUser);
@@ -409,10 +426,8 @@ export default function App() {
   const handleEnterFromCover = () => {
     setShowWelcomeCover(false);
     setActiveSection('inicio');
-    triggerCityAndWeatherNotification();
-    if (!user) {
-      setShowEntryManualModal(true);
-    }
+    setLocationConsentStep('prompt');
+    setShowLocationWeatherToast(true);
   };
 
   const handleScanCompleted = () => {
@@ -628,95 +643,164 @@ export default function App() {
         </div>
       </header>
 
-      {/* FLOATING LIVE LOCATION & WEATHER NOTIFICATION + INTERACTIVE CITY CALIBRATION */}
+      {/* MANDATORY DEVICE LOCATION NOTICE PANEL (replaces floating top-right toast & prevents raw Google prompt) */}
       <AnimatePresence>
         {showLocationWeatherToast && (
           <motion.div
-            initial={{ opacity: 0, y: -18, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -14, scale: 0.97 }}
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-20 right-4 left-4 sm:left-auto sm:right-8 z-[60] max-w-md rounded-2xl bg-[#050505]/95 backdrop-blur-xl border border-[#6FBF94]/40 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.75),0_0_14px_rgba(111,191,148,0.07)] space-y-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#1C1F1E]/60 border border-[#6FBF94]/35 flex items-center justify-center shrink-0">
-                  {isLocating ? (
-                    <MapPin className="w-5 h-5 text-[#6FBF94] neon-logo-glow animate-pulse" />
-                  ) : (
-                    <CloudSun className="w-5 h-5 text-[#6FBF94] neon-logo-glow" />
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6FBF94] block">
-                    {isLocating
-                      ? 'Detectando tu ubicación...'
-                      : 'Ubicación y Clima Actual'}
-                  </span>
-
-                  {isLocating ? (
-                    <p className="text-xs text-[#F8F8F3]">
-                      Ubicándote en tu ciudad actual para calibrar el clima de conservación...
-                    </p>
-                  ) : (
-                    <>
-                      <p className="text-sm font-display font-semibold text-[#F8F8F3]">
-                        Estás en {weather.cityName}
-                        {weather.province ? `, ${weather.province}` : ''}
-                      </p>
-                      <p className="text-xs text-[#A8C4AE] font-mono-tabular">
-                        Clima actual: <strong>{weather.temperature}°C</strong> ·{' '}
-                        {weather.conditionLabel} · {weather.humidity}% HR
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowLocationWeatherToast(false)}
-                aria-label="Cerrar notificación de clima"
-                className="w-7 h-7 rounded-lg border border-[#1C1F1E] bg-[#0A0A0A] text-[#A0AAA4] hover:text-[#F8F8F3] hover:border-[#6FBF94]/50 flex items-center justify-center transition-colors cursor-pointer shrink-0"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Interactive City Switcher & GPS Refresh inside the notification */}
-            <div className="pt-2.5 border-t border-[#1C1F1E] flex items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-1.5 flex-1">
-                <span className="text-[#A0AAA4] whitespace-nowrap">Cambiar ciudad:</span>
-                <select
-                  value={
-                    ARGENTINE_CITIES.find((c) => c.name === weather.cityName)?.id ||
-                    'caba'
-                  }
-                  onChange={(e) => fetchWeatherByCityId(e.target.value)}
-                  className="flex-1 rounded-lg border border-[#1C1F1E] bg-[#0A0A0A] px-2 py-1 text-xs text-[#F8F8F3] focus:border-[#6FBF94]/50 focus:outline-none cursor-pointer"
+            <motion.div
+              initial={{ opacity: 0, y: 16, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.96 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-md rounded-3xl bg-[#050505] border border-[#6FBF94]/40 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(111,191,148,0.08)] space-y-5 relative"
+            >
+              {locationConnected && (
+                <button
+                  type="button"
+                  onClick={() => setShowLocationWeatherToast(false)}
+                  aria-label="Cerrar panel de ubicación"
+                  className="absolute top-5 right-5 w-8 h-8 rounded-xl border border-[#1C1F1E] bg-[#0A0A0A] text-[#A0AAA4] hover:text-[#F8F8F3] hover:border-[#6FBF94]/50 flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  {ARGENTINE_CITIES.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.province})
-                    </option>
-                  ))}
-                </select>
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-[#1C1F1E]/70 border border-[#6FBF94]/40 flex items-center justify-center shrink-0">
+                  <MapPin
+                    className={`w-6 h-6 text-[#6FBF94] neon-logo-glow ${
+                      isLocating ? 'animate-pulse' : ''
+                    }`}
+                  />
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6FBF94] block">
+                    Aviso del sistema · Requisito obligatorio
+                  </span>
+                  <h3 className="text-lg font-display font-bold text-[#F8F8F3]">
+                    Conectá la ubicación de tu dispositivo
+                  </h3>
+                </div>
               </div>
 
-              <button
-                type="button"
-                onClick={triggerCityAndWeatherNotification}
-                disabled={isLocating}
-                className="px-2.5 py-1 rounded-lg border border-[#6FBF94]/30 bg-[#1C1F1E]/40 hover:bg-[#1C1F1E]/70 text-[#6FBF94] flex items-center gap-1 transition-colors cursor-pointer shrink-0"
-                title="Detectar mi ubicación actual por GPS"
-              >
-                <RefreshCw
-                  className={`w-3 h-3 ${isLocating ? 'animate-spin' : ''}`}
-                />
-                <span>GPS</span>
-              </button>
-            </div>
+              {locationConsentStep === 'prompt' ? (
+                <>
+                  <div className="rounded-2xl bg-[#0A0A0A] border border-[#1C1F1E] p-4 space-y-2.5 text-xs sm:text-sm text-[#A0AAA4] leading-relaxed">
+                    <p className="text-[#F8F8F3] font-medium">
+                      Para continuar usando CUIDAR, sí o sí debés vincular la ubicación de tu dispositivo.
+                    </p>
+                    <p>
+                      Nuestra aplicación gestiona directamente la conexión climática local (temperatura y humedad real de tu zona) para calibrar con precisión la frescura y vida útil de tus alimentos.
+                    </p>
+                  </div>
+
+                  {/* Manual city preset selector styled like a clean notice field */}
+                  <div className="rounded-2xl bg-[#0A0A0A] border border-[#1C1F1E] p-3.5 space-y-2">
+                    <label className="text-[11px] font-medium text-[#A8C4AE] block">
+                      Región de referencia en Argentina:
+                    </label>
+                    <select
+                      value={
+                        ARGENTINE_CITIES.find((c) => c.name === weather.cityName)?.id ||
+                        'caba'
+                      }
+                      onChange={(e) => fetchWeatherByCityId(e.target.value)}
+                      className="w-full rounded-xl border border-[#1C1F1E] bg-[#050505] px-3 py-2.5 text-xs sm:text-sm text-[#F8F8F3] focus:border-[#6FBF94]/55 focus:outline-none cursor-pointer"
+                    >
+                      {ARGENTINE_CITIES.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.province})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={connectDeviceLocation}
+                    disabled={isLocating}
+                    className="w-full min-h-[48px] py-3 px-5 rounded-2xl bg-[#6FBF94] hover:bg-[#A8C4AE] text-[#0A0A0A] font-display font-semibold text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-[0_0_16px_rgba(111,191,148,0.12)]"
+                  >
+                    {isLocating ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Conectando ubicación del dispositivo...</span>
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="w-4 h-4" />
+                        <span>Conectar ubicación del dispositivo</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="rounded-2xl bg-[#0A0A0A] border border-[#6FBF94]/30 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#A0AAA4]">Ubicación vinculada</span>
+                      <span className="text-[11px] font-semibold text-[#6FBF94] bg-[#6FBF94]/10 px-2.5 py-0.5 rounded-full border border-[#6FBF94]/30">
+                        Conectado
+                      </span>
+                    </div>
+                    <p className="text-base font-display font-semibold text-[#F8F8F3]">
+                      {weather.cityName}
+                      {weather.province ? `, ${weather.province}` : ''}
+                    </p>
+                    <p className="text-xs text-[#A8C4AE] font-mono-tabular">
+                      Clima actual: <strong>{weather.temperature}°C</strong> ·{' '}
+                      {weather.conditionLabel} · {weather.humidity}% HR
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-[#0A0A0A] border border-[#1C1F1E] p-3.5 flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="text-[#A0AAA4] whitespace-nowrap">Ciudad:</span>
+                      <select
+                        value={
+                          ARGENTINE_CITIES.find((c) => c.name === weather.cityName)?.id ||
+                          'caba'
+                        }
+                        onChange={(e) => fetchWeatherByCityId(e.target.value)}
+                        className="flex-1 rounded-xl border border-[#1C1F1E] bg-[#050505] px-2.5 py-1.5 text-xs text-[#F8F8F3] focus:border-[#6FBF94]/50 focus:outline-none cursor-pointer"
+                      >
+                        {ARGENTINE_CITIES.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} ({c.province})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={connectDeviceLocation}
+                      disabled={isLocating}
+                      className="px-3 py-1.5 rounded-xl border border-[#6FBF94]/30 bg-[#1C1F1E]/50 hover:bg-[#1C1F1E] text-[#6FBF94] flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                    >
+                      <RefreshCw
+                        className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`}
+                      />
+                      <span>Actualizar GPS</span>
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowLocationWeatherToast(false)}
+                    className="w-full min-h-[46px] py-2.5 px-5 rounded-2xl bg-[#6FBF94] hover:bg-[#A8C4AE] text-[#0A0A0A] font-display font-semibold text-sm flex items-center justify-center transition-all cursor-pointer"
+                  >
+                    Continuar a CUIDAR
+                  </button>
+                </>
+              )}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
